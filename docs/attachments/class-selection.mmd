@@ -1,0 +1,67 @@
+%% 选品类图
+classDiagram
+    class Product {
+        +id
+        +platform
+        +title
+        +status
+        +pool_stage
+    }
+    class SupplierOffer {
+        +id
+        +cost
+        +confidence
+    }
+    class ProfitCalculation {
+        +id
+        +rule_version_id
+        +formula_version
+        +fx_snapshot
+        +passed
+    }
+    class InfringementCheck {
+        +id
+        +patent_conclusion
+        +trademark_conclusion
+        +overall_conclusion
+    }
+    class SelectionRule {
+        +id
+        +formula
+        +fx_config
+        +thresholds
+        +version
+    }
+    class ReviewTask {
+        +id
+        +stage
+        +conclusion
+    }
+    Product --> SupplierOffer
+    Product --> ProfitCalculation
+    Product --> InfringementCheck
+    Product --> ReviewTask
+    SelectionRule --> ProfitCalculation
+    class SelectionController {
+        +requestDTO()
+    }
+    class SelectionService {
+        +evaluateSelection()
+    }
+    class SelectionRepository {
+        +save()
+    }
+    class SelectionDTO {
+        +product_id
+    }
+    class ProfitDomainService {
+        +calcProfit()
+    }
+    SelectionController --> SelectionDTO
+    SelectionController --> SelectionService
+    SelectionService --> SelectionRepository
+    SelectionService --> ProfitDomainService
+    SelectionRepository --> Product
+    Product "1" --> "0..*" ReviewTask
+    Product "1" --> "0..*" SupplierOffer
+    SelectionRule "1" --> "0..*" ProfitCalculation

@@ -1,0 +1,22 @@
+flowchart LR
+    OP[运营人员] --> Config
+    REV[选品审核员] --> First
+    REV --> Second
+    SYS[系统任务] --> Select
+    subgraph B[系统边界：选品分析]
+      Config([配置筛选规则])
+      Select([选品分析])
+      Match([匹配货源])
+      Calc([测算与OR筛选])
+      IP([专利与商标校验])
+      First([商品池初核])
+      Second([候选池复核])
+      Reject([驳回并停止后续流程])
+      Manual([缺数据转人工])
+      Select -. "include" .-> Match
+      Select -. "include" .-> Calc
+      Select -. "include" .-> IP
+      Reject -. "extend" .-> First
+      Reject -. "extend" .-> Second
+      Manual -. "extend" .-> Select
+    end

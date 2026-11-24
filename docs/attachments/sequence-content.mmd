@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant S as ContentService/编排
+    participant L as 模型适配器
+    participant R as Repository/PG
+    participant H as 内容审核员
+    participant O as 上架操作员
+    S->>R: 检查复核并创建 PENDING 任务
+    S->>L: 使用冻结 Prompt/知识库版本生成
+    alt 超时、工具失败或置信度缺失/低
+        L-->>S: 失败或不可判定
+        S->>R: FAILED 并转人工，不自动通过
+    else 可用结果
+        L-->>S: 内容与可用元数据
+        S->>R: 保存内容、版本及调用日志
+        S->>S: 运行冻结审核规则
+        S->>R: 保存审核结果，HUMAN_REVIEW_PENDING
+        H->>S: 人工审核
+        alt 驳回
+            S->>R: 记录 REJECTED，不创建上架任务
+        else 通过
+            S->>R: 事务内记录 APPROVED 与审计
+            O->>S: 创建上架任务
+            S->>R: 校验终审并记录 PENDING 任务
+            Note over O,R: 实际上架方式和真实回执待确认，不承诺自动上架
+        end
+    end
