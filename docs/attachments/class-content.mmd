@@ -1,0 +1,52 @@
+%% 内容类图
+classDiagram
+    class ContentJob {
+        +id
+        +status
+        +token_usage
+    }
+    class ContentArtifact {
+        +id
+        +title
+        +confidence
+    }
+    class AuditRule {
+        +id
+        +checks
+        +version
+    }
+    class AuditRun {
+        +id
+        +conclusion
+    }
+    class ListingJob {
+        +id
+        +status
+    }
+    ContentJob --> ContentArtifact
+    ContentArtifact --> AuditRun
+    AuditRule --> AuditRun
+    ContentArtifact --> ListingJob
+    class ContentController {
+        +requestDTO()
+    }
+    class ContentService {
+        +generate()
+    }
+    class ContentRepository {
+        +save()
+    }
+    class ContentDTO {
+        +product_id
+    }
+    class AuditDomainService {
+        +evaluate()
+    }
+    ContentController --> ContentDTO
+    ContentController --> ContentService
+    ContentService --> ContentRepository
+    ContentService --> AuditDomainService
+    ContentRepository --> ContentJob
+    ContentJob "1" --> "0..*" ContentArtifact
+    ContentArtifact "1" --> "0..*" AuditRun
+    AuditRule "1" --> "0..*" AuditRun

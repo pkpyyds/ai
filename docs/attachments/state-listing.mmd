@@ -1,0 +1,6 @@
+%% 上架状态图
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> RUNNING
+    RUNNING --> LISTED
+    RUNNING --> FAILED

@@ -1,0 +1,17 @@
+flowchart LR
+    OP[运营人员] --> Edit
+    SYS[系统任务] --> Generate
+    REVIEWER[内容审核员] --> Human
+    LIST[上架操作员] --> Listing
+    subgraph B[系统边界：内容生成与上架任务]
+      Edit([编辑发布回滚审核逻辑])
+      Generate([生成内容])
+      Auto([执行审核逻辑])
+      Human([人工终审])
+      Listing([创建及人工处理上架任务])
+      Fallback([失败转人工])
+      Deny([审核驳回])
+      Generate -. "include" .-> Auto
+      Fallback -. "extend" .-> Generate
+      Deny -. "extend" .-> Human
+    end

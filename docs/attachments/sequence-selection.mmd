@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant U as 运营/审核员
+    participant C as Controller
+    participant S as SelectionService
+    participant A as 公开数据适配器
+    participant I as 侵权适配器
+    participant R as Repository/PG
+    U->>C: 创建采集任务（幂等键）
+    C->>S: 校验并委派
+    S->>R: 事务内保存任务与幂等记录
+    S->>A: 采集与货源匹配（合规开关批准后）
+    alt 采集失败或字段/货源缺失
+      A-->>S: 失败/缺失
+      S->>R: 记录失败或待人工，不进入测算
+    else 数据完整
+      A-->>S: 商品与货源
+      S->>S: 按冻结规则计算并 OR 筛选
+      alt 筛选不通过
+        S->>R: 记录测算与拦截
+      else 筛选通过
+        S->>I: 专利及商标查询
+        alt 任一不通过或未知
+          I-->>S: 拦截/未知
+          S->>R: 留痕并停止入池
+        else 两维通过
+          I-->>S: 两维通过
+          S->>R: 保存结果，守卫更新 IN_POOL
+        end
+      end
+    end
+    U->>C: 初核通过
+    C->>S: approveReview FIRST
+    S->>R: 同一事务：任务、状态 CANDIDATE、审计
+    U->>C: 复核通过
+    C->>S: approveReview SECOND
+    S->>R: 同一事务：CONTENT_GEN_PENDING、内容任务与审计
+    Note over S,R: 状态冲突或驳回不进入下一阶段；事务失败回滚
